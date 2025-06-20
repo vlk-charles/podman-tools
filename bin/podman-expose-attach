@@ -1,0 +1,5 @@
+#!/bin/sh
+
+"$(dirname "$0")"/podman-expose "$@" &&\
+podman logs "$2-port$3" &&\
+exec podman attach "$2-port$3"

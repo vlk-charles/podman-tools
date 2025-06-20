@@ -24,6 +24,10 @@ running container. The container can be stopped and rmoved with a simple
 3. Podman container port
 4. Host port, optionally preceded by IP address and `:`
 
+## `podman-expose`
+Calls `podman-expose` and then attaches to the proxy container. Arguments have
+the same meaning.
+
 ## `podman-save-delta`
 Uses `podman save` to save an image to an archive and strips the given number
 of lower layers. Useful for distributing small changes to an otherwise large
