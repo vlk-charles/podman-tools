@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# arg 1: Podman netowrk name
+# arg 2: Podman container name lookable up in above network's DNS
+# arg 3: Podman container port
+# arg 4: Host port, optionally preceded by IP address and :
+
+# Validate arguments
+expr + "$1" : '[0-9A-Za-z][0-9A-Za-z_-]*$' >/dev/null || exit 1
+expr + "$2" : '[0-9A-Za-z][0-9A-Za-z_-]*$' >/dev/null || exit 2
+[ 0 -lt "$3" ] || exit 3
+expr + "$4" : '[0-9A-Fa-f:.]\+$' >/dev/null || exit 4
+
+exec podman run -d --rm --replace \
+ --net "$1" --name "$2-port$3" -p "$4:1337" \
+ docker.io/alpine/socat -dd tcp-listen:1337,fork tcp-connect:"$2:$3"

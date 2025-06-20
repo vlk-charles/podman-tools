@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# arg 1: image name prefix; Will not be used for output file name.
+# arg 2: main part of image name, possibly including tag; Will also be used
+#        to form output file name.
+# arg 3: number of base layers to remove
+
+TMPDIR=$0.tmp
+FILENAME=../$(printf %s "$2" | tr /: -).tar
+[ 0 -le "$3" ] || exit 1
+which podman jq tar >/dev/null || exit 2
+
+mkdir "$TMPDIR" && cd "$TMPDIR" || exit 2
+podman save "$1$2" | tar -x manifest.json
+podman save "$1$2" | tar --delete manifest.json $(jq -r ".[].Layers[0:$3][]" <manifest.json) >"$FILENAME"
+jq -c ".[].Layers[0:$3] = [range($3)|tostring]" <manifest.json >manifest.json.jq
+mv -f manifest.json{.jq,}
+touch $(seq 0 $(($3-1)))
+tar --numeric-owner -rf "$FILENAME" manifest.json $(seq 0 $(($3-1)))
+cd .. && rm -r "$TMPDIR"
